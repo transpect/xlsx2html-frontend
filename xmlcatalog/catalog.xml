@@ -6,5 +6,7 @@
   <nextCatalog catalog="../lib/xmlcatalog/catalog.xml"/>
   <nextCatalog catalog="../xproc-util/xmlcatalog/catalog.xml"/>
   <nextCatalog catalog="../xslt-util/xmlcatalog/catalog.xml"/>
+  <nextCatalog catalog="../docx2hub/xmlcatalog/catalog.xml"/>
+
     
 </catalog>
