@@ -99,7 +99,8 @@ if $cygwin; then
     OUT_DIR="$(cygpath -ma "$OUT_DIR")"
     DEBUG_DIR_URI="file:/$(cygpath -ma "$DEBUG_DIR")"
 else
-    DEBUG_DIR_URI="file:$(readlink -f "$DEBUG_DIR")"
+    DIR_URI="file:$DIR"
+    DEBUG_DIR_URI="file:$DEBUG_DIR"
 fi
 
 DEBUG_DIR_URI="${DEBUG_DIR_URI// /%20}"
