@@ -1,0 +1,125 @@
+#!/bin/bash
+
+function usage {
+    echo ""
+    echo "Usage: xlsxconv [options ...] <xlsx file>"
+    echo ""
+    echo "Creates an XHTML and a CSV file from an .xlsx file"
+    echo ""
+    echo "Options:"
+    echo "   -c    CSV cell separator (tab | comma | semicolon; default: tab)"
+    echo "   -d    debug"
+    echo "   -l    CSV line separator (LF | CRLF; default: CRLF)"
+    echo "   -o    output directory (default: directory of input file)"
+    echo "   -s    CSV sheet separator (hyphens | none; default: hyphens)"
+    1>&2; exit 1;
+}
+
+# readlink -f is unavailable on Mac OS X
+function real_dir() {
+    SOURCE="$1"
+    while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+	DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+	SOURCE="$(readlink "$SOURCE")"
+	[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+    done
+    echo "$( cd -P "$( dirname "$SOURCE" )" && pwd  )"
+}
+
+# cygwin check
+cygwin=false;
+case "`uname`" in
+    CYGWIN*) cygwin=true;
+esac
+
+# script directory
+DIR="$( real_dir "${BASH_SOURCE[0]}" )"
+PWD=$(readlink -f .)
+CALABASH=$DIR/calabash/calabash.sh
+PDFLATEX=pdflatex
+HEAP=1024m
+DEBUG=no
+CELLSEP=tab
+LINESEP=CRLF
+SHEETSEP=hyphens
+
+while getopts "c:dl:o:s:" opt; do
+    case "${opt}" in
+	c)
+	    CELLSEP=${OPTARG}
+	    ;;
+	d)
+	    DEBUG=yes
+	    ;;
+	l)
+	    LINESEP=${OPTARG}
+	    ;;
+	o)
+	    OUT_DIR=${OPTARG}
+	    ;;
+	s)
+	    SHEETSEP=${OPTARG}
+	    ;;
+	*)
+	    usage
+	    ;;
+    esac
+done
+shift $((OPTIND-1))
+# check if argument for file is set
+if [ -z "$1" ]; then
+    usage
+fi
+FILE="$1"
+
+# basename
+BASENAME=$(basename "$FILE" .xlsx)
+
+# output directory
+if [[ -z "$OUT_DIR" ]]; then
+    OUT_DIR="$(real_dir "$FILE")"
+else
+if [[ "$OUT_DIR" != /* ]]; then 
+    OUT_DIR="$PWD/$OUT_DIR"
+fi
+fi
+
+mkdir -p "$OUT_DIR"
+
+FILE_CP="$OUT_DIR/$BASENAME.tmp.xlsx"
+cp "$FILE" "$FILE_CP"
+
+DEBUG_DIR=$OUT_DIR/$BASENAME.debug
+
+# make absolute paths
+if $cygwin; then
+    FILE="$(cygpath -ma "$FILE")"
+    FILE_CP="$(cygpath -ma "$FILE_CP")"
+    DIR_URI="file:/$(cygpath -ma "$DIR")"
+    OUT_DIR="$(cygpath -ma "$OUT_DIR")"
+    DEBUG_DIR_URI="file:/$(cygpath -ma "$DEBUG_DIR")"
+else
+    DEBUG_DIR_URI="file:$(readlink -f "$DEBUG_DIR")"
+fi
+
+DEBUG_DIR_URI="${DEBUG_DIR_URI// /%20}"
+OUT_DIR_PSEUDOURI="${OUT_DIR// /%20}"
+BASENAME_PSEUDOURI="${BASENAME// /%20}"
+
+if [ ! -f "$FILE" ]; then
+    echo "Error: input file not found: $FILE"
+    usage
+fi
+
+HEAP=$HEAP $CALABASH \
+    -o "result=$OUT_DIR_PSEUDOURI/$BASENAME_PSEUDOURI.xhtml" \
+    -o "csv=$OUT_DIR_PSEUDOURI/$BASENAME_PSEUDOURI.txt" \
+    $DIR_URI/lib/xpl/xlsx2html.xpl \
+    "in-file=$FILE_CP" \
+    debug=$DEBUG \
+    debug-dir-uri=$DEBUG_DIR_URI \
+    cell-separator=$CELLSEP \
+    line-separator=$LINESEP \
+    sheet-separator=$SHEETSEP
+
+    
