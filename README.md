@@ -14,11 +14,11 @@ Creates an XHTML and a CSV file from an .xlsx file
 
 Option | Description
 ------ | -----------
-   -c  | CSV cell separator (tab | comma | semicolon; default: tab)
+   -c  | CSV cell separator (tab \| comma \| semicolon; default: tab)
    -d  | debug
-   -l  | CSV line separator (LF | CRLF; default: CRLF)
+   -l  | CSV line separator (LF \| CRLF; default: CRLF)
    -o  | output directory (default: directory of input file)
-   -s  | CSV sheet separator (hyphens | none; default: hyphens)
+   -s  | CSV sheet separator (hyphens \| none; default: hyphens)
 
 (sorry no Windows .bat file yet)
 
