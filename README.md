@@ -20,6 +20,13 @@ Option | Description
    -o  | output directory (default: directory of input file)
    -s  | CSV sheet separator (hyphens \| none; default: hyphens)
 
-(sorry no Windows .bat file yet)
+## Prerequisites
 
+* Java 1.7+
+* Bash
 
+Sorry there is no Windows .bat file yet. For the time being, Windows users can invoke calabash.bat like this, from the xlsx2html-frontend directory:
+
+```
+calabash/calabash.bat -o result=out.xhtml -o csv=out.csv lib/xpl/xlsx2html.xpl in-file=path/to/file.xlsx
+```
